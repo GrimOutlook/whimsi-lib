@@ -19,7 +19,6 @@ impl DirectoryDao {
         directory: &impl DirectoryKind,
         parent: &impl DirectoryKind,
     ) -> anyhow::Result<DirectoryDao> {
-        // Check if the parent directory identifier is in `Identifiers` or if it is a `SystemFolder`.
         todo!()
     }
 }

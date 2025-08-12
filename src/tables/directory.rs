@@ -1,10 +1,12 @@
+use anyhow::bail;
+use itertools::Itertools;
 use thiserror::Error;
 
+use crate::Msi;
 use crate::types::dao::directory::DirectoryDao;
-use crate::types::helpers::directory::{DirectoryKind, SubDirectory, SystemDirectory};
-use crate::{Identifiers, Msi};
+use crate::types::helpers::directory::{Directory, DirectoryKind, SubDirectory, SystemDirectory};
 
-use super::{Table, TableKind};
+use super::TableKind;
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DirectoryTable(Vec<DirectoryDao>);
@@ -13,12 +15,23 @@ impl Msi {
     pub fn add_directory_recursive(
         &mut self,
         directory: &SubDirectory,
-        parent: &impl DirectoryKind,
+        parent: Directory,
     ) -> anyhow::Result<()> {
+        // Check if the parent is not in the identities hashmap and if it is not a system folder
+        // return an error.
+        let parent_id = if let Directory::SubDirectory(parent_dir) = parent {
+            let parent_id = parent_dir.id();
+            if !self.identifiers.keys().contains(parent_id) {
+                bail!(MsiError::NoParentForSubdirectory)
+            } else {
+                parent_id
+            };
+        } else {
+        };
+        // Create the table if it doesn't exist
         let mut table: DirectoryTable = self.table_or_new(TableKind::Directories).try_into()?;
-        // TODO: Create a directory table if it doesn't exist.
-        // TODO: Add the directory structure recursively.
-        table.0.push(DirectoryDao::new(directory, parent)?);
+        let new_dao = DirectoryDao::new(directory, &parent)?;
+        table.0.push(new_dao);
         self.add_children(directory)?;
         Ok(())
     }
@@ -39,9 +52,8 @@ impl Msi {
     }
 }
 
-// TODO: Add error messages
 #[derive(Debug, Error)]
-pub enum DirectoryTableConversionError {
-    #[error("Cannot convert non-root directory to directory table")]
-    NonRootDirectory,
+pub enum MsiError {
+    #[error("Subdirectory's parent ID not found in already defined identities")]
+    NoParentForSubdirectory,
 }

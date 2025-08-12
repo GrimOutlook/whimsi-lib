@@ -29,7 +29,7 @@ use std::collections::HashMap;
 
 use getset::Getters;
 use strum::IntoDiscriminant;
-use tables::{MsiTable, Table, TableKind};
+use tables::{Table, TableKind};
 use types::column::{ColumnValue, identifier::Identifier};
 
 type Identifiers = HashMap<Identifier, ColumnValue>;

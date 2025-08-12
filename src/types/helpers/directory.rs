@@ -99,11 +99,7 @@ pub struct SubDirectory {
     #[getset(skip)]
     contained: Vec<Node>,
 
-    /// This can either be a system directory or None. If None, this folder
-    /// will not be parsed as a system folder and instead will have an identifier randomly
-    /// generated for it when placing into the MSI database. Otherwise it will use the system
-    /// folder ID as the identifier in the DAO.
-    id: Option<SystemFolder>,
+    id: Option<Identifier>,
     /// The directory's name (localizable)
     name: Filename,
 }
@@ -114,14 +110,6 @@ impl SubDirectory {
             contained: Vec::new(),
             id: None,
             name,
-        }
-    }
-
-    pub fn system_folder(system_folder: SystemFolder) -> Self {
-        Self {
-            contained: Vec::new(),
-            id: Some(system_folder),
-            name: Filename::parse(".").unwrap(),
         }
     }
 }
